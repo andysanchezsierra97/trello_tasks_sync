@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "202317038362",
+    "project_id": "trello-tasks-sync",
+    "storage_bucket": "trello-tasks-sync.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202317038362:android:43063a558bc9b65cf4a2a3",
+        "android_client_info": {
+          "package_name": "com.example.trello_tasks_sync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBboVfXCDVzDPOhmcHSHiznrWtui8XTMmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

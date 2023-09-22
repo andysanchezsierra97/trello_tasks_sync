@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:trello_tasks_sync/data/datasources/task.dart';
+import 'package:trello_tasks_sync/domain/usecases/Task/get_by_id.dart';
+import 'package:trello_tasks_sync/domain/usecases/task/create.dart';
+import 'package:trello_tasks_sync/domain/usecases/task/delete.dart';
+import 'package:trello_tasks_sync/domain/usecases/task/get_all.dart';
+import 'package:trello_tasks_sync/domain/usecases/task/update.dart';
+import 'package:trello_tasks_sync/presentation/pages/tasks_list_page.dart';
 import 'firebase_options.dart';
+
+import 'package:trello_tasks_sync/bloc/task/bloc.dart';
+import 'package:trello_tasks_sync/data/repositories/task.dart';
+import 'package:trello_tasks_sync/presentation/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,63 +25,27 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Trello Tasks Sync',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      initialRoute: '/',
+      onGenerateRoute: Routes.generateRoute,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<TaskBloc>(
+              create: (_) => TaskBloc(
+                    getAll: GetAllTasks(TaskRepositoryImpl(TaskDatasource())),
+                    // getById: GetTaskById(TaskRepositoryImpl(TaskDatasource())),
+                    create: CreateTask(TaskRepositoryImpl(TaskDatasource())),
+                    update: UpdateTask(TaskRepositoryImpl(TaskDatasource())),
+                    delete: DeleteTask(TaskRepositoryImpl(TaskDatasource())),
+                  ))
+        ],
+        child: const TaskListPage(),
       ),
     );
   }

@@ -1,29 +1,30 @@
-import 'package:trello_tasks_sync/domain/entities/task.dart';
+part of 'bloc.dart';
 
+// @immutable
 abstract class TaskEvent {}
 
 class FetchTasksEvent extends TaskEvent {}
 
-class FetchTaskEvent extends TaskEvent {
-  final String id;
+// class FetchTaskEvent extends TaskEvent {
+//   final String id;
 
-  FetchTaskEvent(this.id);
-}
+//   FetchTaskEvent({required this.id});
+// }
 
 class CreateTaskEvent extends TaskEvent {
   final Task task;
 
-  CreateTaskEvent(this.task);
+  CreateTaskEvent({required this.task});
 }
 
 class UpdateTaskEvent extends TaskEvent {
   final Task task;
 
-  UpdateTaskEvent(this.task);
+  UpdateTaskEvent({required this.task});
 }
 
 class DeleteTaskEvent extends TaskEvent {
   final String id;
 
-  DeleteTaskEvent(this.id);
+  DeleteTaskEvent({required this.id});
 }

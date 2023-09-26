@@ -1,4 +1,3 @@
-import 'package:trello_tasks_sync/domain/entities/task.dart';
 import 'package:trello_tasks_sync/domain/repositories/task.dart';
 
 class UpdateTask {
@@ -6,7 +5,8 @@ class UpdateTask {
 
   UpdateTask(this.repository);
 
-  Future<void> call(Task task) async {
-    await repository.update(task);
+  Future<void> call(String token, String id, String title, String description,
+      bool isCompleted) async {
+    await repository.update(token, id, title, description, isCompleted);
   }
 }

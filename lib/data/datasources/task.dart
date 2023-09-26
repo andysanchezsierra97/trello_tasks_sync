@@ -1,62 +1,132 @@
 import 'package:trello_tasks_sync/domain/entities/task.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class TaskDatasource {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<List<Task>> getAll() async {
+  Future<List<Task>> getAll(String token) async {
     try {
-      final querySnapshot = await firestore.collection('task').get();
-      final tasks = querySnapshot.docs.map((doc) {
+      final userId = await _getCurrentUser(token);
+      if (userId == null) {
+        throw 'Invalid token';
+      }
+
+      final tasksSnapshot = await firestore
+          .collection('task')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      final tasks = tasksSnapshot.docs.map((doc) {
         final data = doc.data();
+
         return Task(
-            id: doc.id, title: data['title'], description: data['description']);
+            userId: userId,
+            id: doc.id,
+            title: data['title'],
+            description: data['description'],
+            createdAt: data['createdAt'].toDate(),
+            updatedAt: data['updatedAt'].toDate(),
+            isCompleted: data['isCompleted']);
       }).toList();
+      tasks.sort((a, b) {
+        if (a.isCompleted != b.isCompleted) {
+          return a.isCompleted ? 1 : -1;
+        } else {
+          return a.createdAt.compareTo(b.createdAt);
+        }
+      });
       return tasks;
     } catch (error) {
       throw error.toString();
     }
   }
 
-  Future<Task> getById(String id) async {
+  Future<void> create(String token, String title, String description) async {
     try {
-      final documentSnapshot = await firestore.collection('task').doc(id).get();
-      final data = documentSnapshot.data() as Map<String, dynamic>;
-      return Task(
-          id: documentSnapshot.id,
-          title: data['title'],
-          description: data['description']);
+      final userId = await _getCurrentUser(token);
+      if (userId == null) {
+        throw 'Invalid token';
+      }
+
+      await firestore.collection('task').add({
+        'userId': userId,
+        'title': title,
+        'description': description,
+        'createdAt': DateTime.now(),
+        'updatedAt': DateTime.now(),
+        'isCompleted': false
+      });
     } catch (error) {
       throw error.toString();
     }
   }
 
-  Future<void> create(Task task) async {
+  Future<void> update(String token, String id, String title, String description,
+      bool isCompleted) async {
     try {
-      await firestore
+      final userId = await _getCurrentUser(token);
+      if (userId == null) {
+        throw 'Invalid token';
+      }
+
+      final taskSnapshot = await firestore
           .collection('task')
-          .add({'title': task.title, 'description': task.description});
+          .where(FieldPath.documentId, isEqualTo: id)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      if (taskSnapshot.docs.isEmpty) {
+        throw 'Invalid token';
+      }
+
+      await taskSnapshot.docs.first.reference.update({
+        'title': title,
+        'description': description,
+        'updatedAt': DateTime.now(),
+        'isCompleted': isCompleted
+      });
     } catch (error) {
       throw error.toString();
     }
   }
 
-  Future<void> update(Task task) async {
+  Future<void> delete(String token, String id) async {
     try {
-      await firestore
+      final userId = await _getCurrentUser(token);
+      if (userId == null) {
+        throw 'Invalid token';
+      }
+      final taskSnapshot = await firestore
           .collection('task')
-          .doc(task.id)
-          .update({'title': task.title, 'description': task.description});
+          .where(FieldPath.documentId, isEqualTo: id)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      if (taskSnapshot.docs.isEmpty) {
+        throw 'Invalid token';
+      }
+
+      await taskSnapshot.docs.first.reference.delete();
     } catch (error) {
       throw error.toString();
     }
   }
 
-  Future<void> delete(String id) async {
+  Future<String?> _getCurrentUser(String token) async {
     try {
-      await firestore.collection('task').doc(id).delete();
-    } catch (error) {
-      throw error.toString();
+      final jwt = JWT.verify(token, SecretKey('trello_task_sync_jwt_secret'));
+      final username = jwt.payload['username'];
+      final userSnapshot = await firestore
+          .collection('user')
+          .where('username', isEqualTo: username)
+          .get();
+      if (userSnapshot.docs.isEmpty) {
+        return null;
+      }
+      return userSnapshot.docs.first.id;
+    } catch (e) {
+      return null;
     }
   }
 }

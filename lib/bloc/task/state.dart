@@ -10,12 +10,6 @@ class TasksLoadedState extends TaskState {
   TasksLoadedState({required this.tasks});
 }
 
-// class TaskLoadedState extends TaskState {
-//   final Task task;
-
-//   TaskLoadedState({required this.task});
-// }
-
 class TaskOperationSuccessState extends TaskState {
   final String action;
 

@@ -6,7 +6,7 @@ class GetAllTasks {
 
   GetAllTasks(this.repository);
 
-  Future<List<Task>> call() async {
-    return await repository.getAll();
+  Future<List<Task>> call(String token) async {
+    return await repository.getAll(token);
   }
 }

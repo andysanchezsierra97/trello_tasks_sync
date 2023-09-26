@@ -3,28 +3,39 @@ part of 'bloc.dart';
 // @immutable
 abstract class TaskEvent {}
 
-class FetchTasksEvent extends TaskEvent {}
+class FetchTasksEvent extends TaskEvent {
+  final String token;
 
-// class FetchTaskEvent extends TaskEvent {
-//   final String id;
-
-//   FetchTaskEvent({required this.id});
-// }
+  FetchTasksEvent({required this.token});
+}
 
 class CreateTaskEvent extends TaskEvent {
-  final Task task;
+  final String token;
+  final String title;
+  final String description;
 
-  CreateTaskEvent({required this.task});
+  CreateTaskEvent(
+      {required this.token, required this.title, required this.description});
 }
 
 class UpdateTaskEvent extends TaskEvent {
-  final Task task;
+  final String token;
+  final String id;
+  final String title;
+  final String description;
+  final bool isCompleted;
 
-  UpdateTaskEvent({required this.task});
+  UpdateTaskEvent(
+      {required this.token,
+      required this.id,
+      required this.title,
+      required this.description,
+      required this.isCompleted});
 }
 
 class DeleteTaskEvent extends TaskEvent {
+  final String token;
   final String id;
 
-  DeleteTaskEvent({required this.id});
+  DeleteTaskEvent({required this.token, required this.id});
 }

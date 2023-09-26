@@ -8,27 +8,23 @@ class TaskRepositoryImpl implements TaskRepository {
   TaskRepositoryImpl(this.datasource);
 
   @override
-  Future<List<Task>> getAll() async {
-    return await datasource.getAll();
+  Future<List<Task>> getAll(String token) async {
+    return await datasource.getAll(token);
   }
 
   @override
-  Future<Task> getById(String id) async {
-    return await datasource.getById(id);
+  Future<void> create(String token, String title, String description) async {
+    await datasource.create(token, title, description);
   }
 
   @override
-  Future<void> create(Task task) async {
-    await datasource.create(task);
+  Future<void> update(String token, String id, String title, String description,
+      bool isCompleted) async {
+    await datasource.update(token, id, title, description, isCompleted);
   }
 
   @override
-  Future<void> update(Task task) async {
-    await datasource.update(task);
-  }
-
-  @override
-  Future<void> delete(String id) async {
-    await datasource.delete(id);
+  Future<void> delete(String token, String id) async {
+    await datasource.delete(token, id);
   }
 }
